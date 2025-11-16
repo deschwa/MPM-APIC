@@ -52,8 +52,8 @@ function create_particle_distribution_from_csv(input_file, material_dict, Nx, Ny
         vel = zeros(Float64, 2, N)
 
         for i in 1:N
-            pos[:,d] .= [Float64(group.x[i]), Float64(group.y[i])]
-            vel[:,d] .= [Float64(group.vx[i]), Float64(group.vy[i])]
+            pos[:,i] .= [Float64(group.x[i]), Float64(group.y[i])]
+            vel[:,i] .= [Float64(group.vx[i]), Float64(group.vy[i])]
         end
 
         mass = [Float64(group.mass[i]) for i in 1:length(group.mass)]
@@ -83,13 +83,14 @@ end
 
 function create_sim_from_csv(input_csv, input_yaml)
     material_dict, grid_dict, time_dict = get_sim_data(input_yaml)
-    mp_groups = create_particle_distribution_from_csv(input_csv, material_dict)
     grid = create_grid_from_yaml(grid_dict)
+    Nx, Ny = grid_dict["N_x"], grid_dict["N_y"]
+    mp_groups = create_particle_distribution_from_csv(input_csv, material_dict, Nx, Ny)
     dt = time_dict["dt"]
-    t_end = time_dict["t_end"]
+    t_end = time_dict["total_time"]
 
-    sim = MPMSimulation(mp_groups, grid, dt, t_end)
-    return sim
+    sim = MPMSimulation(mp_groups, grid, dt, 0.0, t_end)
+    return sim, grid_dict, material_dict
 end
 
 

@@ -1,0 +1,17 @@
+materials:
+  - name: Steel
+    type: LinearElastic
+    E: 2.1e11
+    nu: 0.3
+    rho: 7850
+grid:
+  - N_x: 50
+    N_y: 50
+    min_x: 0.0
+    max_x: 1.0
+    min_y: 0.0
+    max_y: 1.0
+time:
+  - dt: 1e-3
+    total_time: 0.1
+  

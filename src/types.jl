@@ -50,7 +50,8 @@ struct MaterialPointGroup{MaterialType<:AbstractMaterial}
     node_cache::Array{Int64, 3}                 # node cache; 2x4xN Matrix, access via i, j = node_cache[:, grid_index, particle_idx]
     N_cache::Array{Float64, 2}                  # N_Ip cache; 4xN Matrix, access via N_Ip = N[node_idx, particle_idx]
     ∇N_cache::Array{Float64, 3}                 # ∇N Cache; 2x4xN Matrix, access via ∇N_Ip = ∇N_cache[:, node_idx, particle_idx]
-    bin_map_cache::Matrix{Vector{Int64}}        # Bin Map cache; Nx x Ny Matrix containing particle indices corresponding to grid cell
+    bin_map_cache::Array{Vector{Int64},2}       # Bin Map cache; Nx x Ny Matrix containing particle indices corresponding to grid cell
+    k_map_cache::Array{Vector{Int64},2}         # K Map cache; Nx x Ny Matrix containing vectors of grid_indexes corresponding to grid cell
 
     # Constructor using only pos, vel, mass, volume, and material. AbstractString is used because sometimes CSVs are read as String7
     function MaterialPointGroup(pos::Array{Float64, 2}, 
@@ -60,8 +61,15 @@ struct MaterialPointGroup{MaterialType<:AbstractMaterial}
                                 material::MaterialType, type::AbstractString,
                                 Nx::Int64, Ny::Int64) where {MaterialType<:AbstractMaterial}
 
+        # Number of particles is the number of columns in pos (pos is 2 x N)
+        N = size(pos, 2)
 
-        N = length(pos)
+        # Basic consistency checks to avoid bounds errors later
+        @assert size(pos, 1) == 2 "pos must be a 2 x N array"
+        @assert size(vel, 1) == 2 "vel must be a 2 x N array"
+        @assert size(vel, 2) == N "vel must have the same number of columns as pos"
+        @assert length(mass) == N "mass length must equal number of particles"
+        @assert length(volume) == N "volume length must equal number of particles"
 
         density = [m/v for (m,v) in zip(mass, volume)]
         volume_0 = copy(volume)
@@ -75,8 +83,11 @@ struct MaterialPointGroup{MaterialType<:AbstractMaterial}
         node_cache = zeros(Int64, (2,4,N))
         N_cache = zeros(Float64, (4,N))
         ∇N_cache = zeros(Float64, (2,4,N))
-        bin_map_cache = Matrix{Vector{Int64}}([], Nx, Ny)
+        bin_map_cache = [[] for j in 1:Ny, i in 1:Nx]
+        k_map_cache = [[] for j in 1:Ny, i in 1:Nx]
 
+        # Ensure stored `type` is a concrete String to match the field type
+        type_str = String(type)
 
         new{MaterialType}(N,
             pos,
@@ -90,11 +101,12 @@ struct MaterialPointGroup{MaterialType<:AbstractMaterial}
             σ,
             L,
             material,
-            type,
+            type_str,
             node_cache,
             N_cache,
             ∇N_cache,
-            bin_map_cache)
+            bin_map_cache,
+            k_map_cache)
 
     end
 
@@ -166,6 +178,7 @@ mutable struct MPMSimulation{MPGroupTouple <: Tuple}
     grid::Grid
     dt::Float64
     t::Float64
+    total_time::Float64
 end
 
 

@@ -24,25 +24,34 @@ function cache_bin_map!(mp_group::MaterialPointGroup, grid::Grid)
     Nx = size(grid.mass, 1)
     Ny = size(grid.mass, 2)
 
-    bin_map = [Vector{Int64}() for i in 1:Nx, j in 1:Ny]
+    bin_map_cache = mp_group.bin_map_cache
+    k_map_cache = mp_group.k_map_cache
 
-    for p_idx in 1:mp_group.N     
-        for node_idx in 1:4
-            i,j = mp_group.node_cache[:, node_idx, p_idx]
-            push!(bin_map[i, j], p_idx)
+    # Reset caches
+    @inbounds for j in 1:Ny
+        for i in 1:Nx
+            empty!(bin_map_cache[i, j])
+            empty!(k_map_cache[i, j])
         end
     end
 
-    mp_group.bin_map_cache .= bin_map
-    
+    # Fill caches
+    @inbounds for p_idx in 1:mp_group.N     
+        for node_idx in 1:4
+            i = mp_group.node_cache[1, node_idx, p_idx]
+            j = mp_group.node_cache[2, node_idx, p_idx]
+            push!(bin_map_cache[i, j], p_idx)
+            push!(k_map_cache[i, j], node_idx)
+        end
+    end
 end
 
 
 function reset_grid!(grid::Grid)
     grid.v .= 0.0
     grid.v_new .= 0.0
-    grid.momentum_apic .= 0.0
-    grid.momentum_flip .= 0.0
+    grid.momentum .= 0.0
+    grid.momentum_new .= 0.0
     grid.f_ext .= 0.0
     grid.f_int .= 0.0
     grid.mass .= 0.0   

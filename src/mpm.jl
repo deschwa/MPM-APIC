@@ -8,7 +8,7 @@ include("boundaries.jl")
 include("timestep.jl")
 
 
-export MPMSimulation, MaterialPointGroup, Grid, timestep!
+export MPMSimulation, MaterialPointGroup, Grid, timestep!, LinearElastic, NeoHookean
 
 
 end # Nodule MPM

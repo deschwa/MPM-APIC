@@ -1,0 +1,17 @@
+materials:
+  - name: Iron
+    type: LinearElastic
+    E: 2.1e11
+    nu: 0.3
+    rho: 7850
+grid:
+  - N_x: 20
+    N_y: 3
+    min_x: -10
+    max_x: 10
+    min_y: -10
+    max_y: 10.0
+time:
+  - dt: 1e-3
+    total_time: 1.0
+  

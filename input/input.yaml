@@ -1,0 +1,22 @@
+materials:
+  - name: "1"
+    type: LinearElastic
+    E: 1e3
+    nu: 0.3
+    rho: 1000
+  - name: "2"
+    type: LinearElastic
+    E: 1e3
+    nu: 0.3
+    rho: 1000
+grid:
+  - N_x: 20
+    N_y: 20
+    min_x: -0.5
+    max_x: 0.5
+    min_y: -0.5
+    max_y: 0.5
+time:
+  - dt: 1e-3
+    total_time: 3.5
+  

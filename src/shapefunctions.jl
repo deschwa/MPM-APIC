@@ -1,5 +1,6 @@
 using Base.Threads
 using LinearAlgebra
+using StaticArrays
 
 
 
@@ -12,8 +13,8 @@ function shape_function(r_rel::SVector{2,Float64}, dx::Float64, dy::Float64)
 
     dN_xdx = - sign(r_rel[1]) / dx
     dN_ydy = - sign(r_rel[2]) / dy
-    ∇N_I = SVector(dN_xdx * N_y,
-            dN_ydy * N_x)
+    ∇N_I = @SVector [dN_xdx * N_y,
+            dN_ydy * N_x]
 
 
     return (N_I, ∇N_I)
@@ -30,7 +31,7 @@ function cache_shape_functions!(mp_group::MaterialPointGroup, grid::Grid)
         for (node_idx, (i,j)) in enumerate(adj_nodes)
             mp_group.node_cache[:, node_idx, p_idx] .= (i,j)
 
-            rel_pos = @SVector (pos_p .- grid.pos[:, i, j])
+            rel_pos = SVector{2}(pos_p .- grid.pos[:, i, j])
 
             N_Ip, ∇N_Ip = shape_function(rel_pos, grid.dx, grid.dy)
 
