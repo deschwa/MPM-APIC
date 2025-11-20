@@ -23,7 +23,8 @@ function stress_update!(mp_group::MaterialPointGroup{LinearElastic}, dt::Float64
         tr_ε = tr(ε_new)
 
         σ_new = σp + λ*tr_ε*I_dim + 2*μ*ε_new
-
+        
+        
         mp_group.σ[:,:,p_idx] .= σ_new
     end
 end

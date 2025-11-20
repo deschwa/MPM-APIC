@@ -75,6 +75,10 @@ struct MaterialPointGroup{MaterialType<:AbstractMaterial}
         volume_0 = copy(volume)
 
         F = zeros(Float64, (2,2,N))
+        for p_idx in 1:N
+            F[:,:,p_idx] .= [1.0 0.0; 0.0 1.0]
+        end
+
         σ = zeros(Float64, (2,2,N))
         L = zeros(Float64, (2,2,N))
 

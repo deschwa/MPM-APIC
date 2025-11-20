@@ -103,12 +103,12 @@ function timestep!(sim::MPMSimulation, alpha::Float64)
 
                 @views mp_group.pos[:,p_idx] .+= sim.dt * x_new_temp
 
-                @views mp_group.L[:,:,p_idx] .= L_new_temp
+                @views mp_group.L[:,:,p_idx] .= L_new_temp * alpha
 
                 F_p = SMatrix{2,2}(mp_group.F[:,:,p_idx])
                 L_p = SMatrix{2,2}(mp_group.L[:,:,p_idx])
 
-                F_new = (I_2 + alpha * L_p) * F_p
+                F_new = (I_2 + sim.dt * L_p) * F_p
                 @views mp_group.F[:,:,p_idx] .= F_new
 
                 mp_group.volume[p_idx] = det(F_new) * mp_group.volume_0[p_idx]

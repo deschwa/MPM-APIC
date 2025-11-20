@@ -31,6 +31,12 @@ function cache_shape_functions!(mp_group::MaterialPointGroup, grid::Grid)
         for (node_idx, (i,j)) in enumerate(adj_nodes)
             mp_group.node_cache[:, node_idx, p_idx] .= (i,j)
 
+            if (i>20 || j>20)
+                println(i,j)
+                println(mp_group.node_cache[:, node_idx, p_idx])
+                println(mp_group.σ[:,:, p_idx])
+            end
+
             rel_pos = SVector{2}(pos_p .- grid.pos[:, i, j])
 
             N_Ip, ∇N_Ip = shape_function(rel_pos, grid.dx, grid.dy)

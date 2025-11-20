@@ -9,7 +9,7 @@ using YAML
 using ZipFile
 using Base.Filesystem
 
-function write_particle_csv(sim::MPMSimulation, material_dict::Dict{String, Any}, output_path::String)
+function write_particle_csv(sim::MPMSimulation, output_path::String)
     rows = []
     for mp_group in sim.mp_groups
         for i in 1:length(mp_group.mass)
