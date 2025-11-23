@@ -68,7 +68,7 @@ mass = [1.0 for _ in 1:10^2]
 LinEla = LinearElastic(1e3, 0.3, 1000)
 
 
-mp = MaterialPointGroup(pos, vel, mass, vols, LinEla, "1", 10, 10)
+mp = MaterialPointGroup(pos, vel, mass, vols, LinEla, "1")
 grid = Grid(10, 10, -1.0, 1.0, -1.0, 1.0)
 
 sim_template = MPMSimulation((mp,), grid, 1e-3, 0.0, 10.0)

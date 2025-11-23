@@ -16,10 +16,12 @@ function stress_update!(mp_group::MaterialPointGroup{LinearElastic}, dt::Float64
                       0.0 1.0]
     
     @threads for p_idx in 1:mp_group.N
-        Lp = @view mp_group.L[:,:,p_idx]
-        σp = @view mp_group.σ[:,:,p_idx]
+        Lp = SMatrix{2,2}(mp_group.L[1,1,p_idx], mp_group.L[2,1,p_idx],
+                            mp_group.L[1,2,p_idx], mp_group.L[2,2,p_idx])
+        σp = SMatrix{2,2}(mp_group.σ[1,1,p_idx], mp_group.σ[2,1,p_idx],
+                            mp_group.σ[1,2,p_idx], mp_group.σ[2,2,p_idx])
 
-        ε_new = 0.5 * dt * (Lp + transpose(Lp))
+        ε_new = 0.5 * dt * (Lp + Lp')
         tr_ε = tr(ε_new)
 
         σ_new = σp + λ*tr_ε*I_dim + 2*μ*ε_new

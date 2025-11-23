@@ -22,24 +22,26 @@ end
 
 
 function cache_shape_functions!(mp_group::MaterialPointGroup, grid::Grid)
+    Nx, Ny = size(grid.mass)
 
     @threads for p_idx in 1:mp_group.N
-        @views pos_p = mp_group.pos[:, p_idx]
+        pos_p = SVector{2}(mp_group.pos[1, p_idx], mp_group.pos[2, p_idx])
 
         adj_nodes = get_adjacent_grid_nodes(pos_p, grid)
 
         for (node_idx, (i,j)) in enumerate(adj_nodes)
-            mp_group.node_cache[:, node_idx, p_idx] .= (i,j)
+            mp_group.node_cache[1, node_idx, p_idx] = i
+            mp_group.node_cache[2, node_idx, p_idx] = j
 
-            if (i>20 || j>20)
-                println(i,j)
-                println(mp_group.node_cache[:, node_idx, p_idx])
-                println(mp_group.σ[:,:, p_idx])
+            if (i >= 1 && i <= Nx && j >= 1 && j <= Ny)
+                r_ij = SVector{2}(grid.pos[1, i, j], grid.pos[2, i, j])
+                rel_pos = pos_p - r_ij
+                
+                N_Ip, ∇N_Ip = shape_function(rel_pos, grid.dx, grid.dy)
+            else
+                N_Ip = 0.0
+                ∇N_Ip = @SVector [0.0, 0.0]
             end
-
-            rel_pos = SVector{2}(pos_p .- grid.pos[:, i, j])
-
-            N_Ip, ∇N_Ip = shape_function(rel_pos, grid.dx, grid.dy)
 
             mp_group.N_cache[node_idx, p_idx] = N_Ip
             mp_group.∇N_cache[:, node_idx, p_idx] .= ∇N_Ip

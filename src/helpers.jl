@@ -5,12 +5,12 @@
 
 (i  ,j  )           (i+1,j  )
 """
-function get_adjacent_grid_nodes(pos::AbstractVector{<:Real}, grid::Grid)
+function get_adjacent_grid_nodes(pos::SVector{2,Float64}, grid::Grid)
 
-    i = floor(Int64, (pos[1]-grid.minx) / grid.dx) + 1  # 1-based indexing
-    j = floor(Int64, (pos[2]-grid.miny) / grid.dy) + 1  # 1-based indexing
+    i = clamp(floor(Int64, (pos[1]-grid.minx) / grid.dx) + 1, 1, size(grid.mass, 1))  # 1-based indexing
+    j = clamp(floor(Int64, (pos[2]-grid.miny) / grid.dy) + 1, 1, size(grid.mass, 2))  # 1-based indexing
 
-    return [
+    return @SVector [
         (i, j),
         (i+1, j),
         (i, j+1),

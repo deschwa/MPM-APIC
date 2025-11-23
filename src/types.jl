@@ -50,16 +50,13 @@ struct MaterialPointGroup{MaterialType<:AbstractMaterial}
     node_cache::Array{Int64, 3}                 # node cache; 2x4xN Matrix, access via i, j = node_cache[:, grid_index, particle_idx]
     N_cache::Array{Float64, 2}                  # N_Ip cache; 4xN Matrix, access via N_Ip = N[node_idx, particle_idx]
     ∇N_cache::Array{Float64, 3}                 # ∇N Cache; 2x4xN Matrix, access via ∇N_Ip = ∇N_cache[:, node_idx, particle_idx]
-    bin_map_cache::Array{Vector{Int64},2}       # Bin Map cache; Nx x Ny Matrix containing particle indices corresponding to grid cell
-    k_map_cache::Array{Vector{Int64},2}         # K Map cache; Nx x Ny Matrix containing vectors of grid_indexes corresponding to grid cell
-
+    
     # Constructor using only pos, vel, mass, volume, and material. AbstractString is used because sometimes CSVs are read as String7
     function MaterialPointGroup(pos::Array{Float64, 2}, 
                                 vel::Array{Float64, 2},
                                 mass::Vector{Float64}, 
                                 volume::Vector{Float64}, 
-                                material::MaterialType, type::AbstractString,
-                                Nx::Int64, Ny::Int64) where {MaterialType<:AbstractMaterial}
+                                material::MaterialType, type::AbstractString) where {MaterialType<:AbstractMaterial}
 
         # Number of particles is the number of columns in pos (pos is 2 x N)
         N = size(pos, 2)
@@ -87,8 +84,6 @@ struct MaterialPointGroup{MaterialType<:AbstractMaterial}
         node_cache = zeros(Int64, (2,4,N))
         N_cache = zeros(Float64, (4,N))
         ∇N_cache = zeros(Float64, (2,4,N))
-        bin_map_cache = [[] for j in 1:Ny, i in 1:Nx]
-        k_map_cache = [[] for j in 1:Ny, i in 1:Nx]
 
         # Ensure stored `type` is a concrete String to match the field type
         type_str = String(type)
@@ -108,9 +103,7 @@ struct MaterialPointGroup{MaterialType<:AbstractMaterial}
             type_str,
             node_cache,
             N_cache,
-            ∇N_cache,
-            bin_map_cache,
-            k_map_cache)
+            ∇N_cache)
 
     end
 

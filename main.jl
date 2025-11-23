@@ -16,13 +16,13 @@ grid_path(t) = "output/grid/dump_g.$t.xyz"
 sim, grid_dict, mat_dict = create_sim_from_csv(input_csv, input_yaml)
 
 
-timestep!(sim, 0.0)
+timestep!(sim, 1.0)
 
 println("Starting simulation with $(Threads.nthreads()) Thread(s)...")
 calculated_steps = 0
 start_time = time()
 while sim.t < sim.total_time
-    timestep!(sim, 0.1)
+    timestep!(sim, 1.0)
     # print("Calculating time: ", round(sim.t, digits=4), " or $(round(sim.t / sim.total_time, digits=4)*100)%\r")
 
     if calculated_steps % 50 == 0
