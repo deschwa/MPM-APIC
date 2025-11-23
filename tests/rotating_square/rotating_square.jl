@@ -61,7 +61,7 @@ function total_angular_momentum(mp_group::MaterialPointGroup)
 end
 
 
-pos, vel, vols = rotating_square([0.0,0.0], 1.0, 10, 1.0)
+pos, vel, vols = rotating_square([0.0,0.0], 1.0, 10, 0.5)
 
 mass = [1.0 for _ in 1:10^2]
 
@@ -71,46 +71,52 @@ LinEla = LinearElastic(1e3, 0.3, 1000)
 mp = MaterialPointGroup(pos, vel, mass, vols, LinEla, "1")
 grid = Grid(10, 10, -1.0, 1.0, -1.0, 1.0)
 
-sim_template = MPMSimulation((mp,), grid, 1e-3, 0.0, 10.0)
+sim_template = MPMSimulation((mp,), grid, 1e-3, 0.0, 20.0)
 
-alphas = collect(range(0.95, 1.0, length=11))
+alphas = collect(range(0.9, 1.0, length=11))
+# alphas = [1.0]
 
 angular_momenta = Dict{Real, AbstractVector}()
 times = Dict{Real, AbstractVector}()
 
-plt = plot(title="Drehimpuls Erhaltung APIC", xlabel="t", ylabel="L")
+# plt = plot(title="Conservation of angular momentum\nusing APIC Transfer and big α", xlabel="Time t", ylabel="log(|L - L₀| / L₀)", legend=:bottomright)
+plt = plot(title="Conservation of angular momentum\nusing APIC Transfer and big α", xlabel="Time t", ylabel="Total angular momentum L", legend=:bottomright)
+angular_momenta_0 = total_angular_momentum(sim_template.mp_groups[1])
+
 for alpha in alphas
     sim = deepcopy(sim_template)
     calculated_steps = 0
     angular_momenta[alpha] = []
     times[alpha] = []
 
+
     while sim.t < sim.total_time
+        L_current = total_angular_momentum(sim.mp_groups[1])
+        push!(angular_momenta[alpha], L_current)
+        push!(times[alpha], sim.t)
+
         timestep!(sim, alpha)
         if calculated_steps % 10 == 0
             print("Calculating time: ", round(sim.t, digits=1), " or $(round(sim.t / sim.total_time *100, digits=1))%\r")
         end
-
-        # if calculated_steps % 50 == 0
+        
+        # if calculated_steps % 100 == 0
         #     # println(particle_path(calculated_steps))
-            
         #     write_particle_xyz(sim, particle_path(calculated_steps))
         # end
-        L_current = total_angular_momentum(sim.mp_groups[1])
-        push!(angular_momenta[alpha], L_current)
-        push!(times[alpha], sim.t)
         calculated_steps += 1
     end
     # println("$(angular_momenta[alpha][1]), $(angular_momenta[alpha][end])")
-
-    plot!(plt, times[alpha], angular_momenta[alpha], label="alpha=$alpha", legend=true)
-
+    
+    # plot!(plt, times[alpha], log.(abs.(angular_momenta[alpha] .- angular_momenta_0)./angular_momenta_0), label="alpha=$alpha")
+    plot!(plt, times[alpha], angular_momenta[alpha], label="alpha=$alpha")
+    
     println("Plotting completed for alpha=$alpha")
-
+    
 end
-
+plot!(plt, times[alphas[1]], fill(angular_momenta_0, length(times[alphas[1]])), linestyle=:dash, label="L₀")
 # xlabel!("t")
 # ylabel!("angular momentum")
-# ylims!(0.0, 25.0)
+# ylims!(-15.0, 0.5)
 
-savefig("angular_momenta.png")
+savefig("angular_momenta_absolute.png")
